@@ -1,8 +1,8 @@
 require "spec_helper"
 
-describe Sshpm do
+describe SSHPM do
   it "has a version number" do
-    expect(Sshpm::VERSION).not_to be nil
+    expect(SSHPM::VERSION).not_to be nil
   end
 
   it "does something useful" do

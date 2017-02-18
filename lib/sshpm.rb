@@ -1,5 +1,5 @@
 require "sshpm/version"
 
-module Sshpm
+module SSHPM
   # Your code goes here...
 end
