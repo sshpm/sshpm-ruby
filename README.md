@@ -22,7 +22,20 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+```ruby
+SSHPM.manage(['host1', 'host2', 'host3']) do
+  add_user do
+    name 'user1_name'
+    public_key 'OnotaXaeouaenthaeu'
+    sudo true
+  end
+
+  remove_user do
+    name 'user2_name'
+    public_key 'oetHEneteconaAaeteahaurt'
+  end
+end
+```
 
 ## Development
 

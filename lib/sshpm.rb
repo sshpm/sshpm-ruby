@@ -12,6 +12,7 @@ module SSHPM
     hosts.map(&:to_s).uniq.map do |host|
       manager = Manager.new(host)
       manager.instance_eval(&block)
+      manager.tasks
     end
   end
 end
