@@ -3,7 +3,7 @@ require 'sshpm/tasks'
 class SSHPM::Manager
   attr_accessor :host, :tasks
 
-  def initialize(host)
+  def initialize(host='localhost')
     @host = host
     @tasks = []
   end

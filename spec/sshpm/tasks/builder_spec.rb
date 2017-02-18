@@ -1,3 +1,5 @@
+require 'spec_helper'
+
 describe SSHPM::Tasks::Builder do
   it "builds empty Hash" do
     builders = [
