@@ -9,5 +9,11 @@ module SSHPM::Tasks
     def method_missing(name, *args)
       attributes[name] = args[0]
     end
+
+    def self.build(&block)
+      builder = Builder.new
+      builder.instance_eval(&block) unless block.nil?
+      builder
+    end
   end
 end
