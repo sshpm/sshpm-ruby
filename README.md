@@ -32,7 +32,12 @@ SSHPM.manage(['host1', 'host2', 'host3']) do
 
   remove_user do
     name 'user2_name'
-    public_key 'oetHEneteconaAaeteahaurt'
+  end
+
+  # in this case, the user is not sudo
+  add_user do
+    name 'user3_name'
+    public_key 'OnotaXaeouaenthaeu'
   end
 end
 ```
