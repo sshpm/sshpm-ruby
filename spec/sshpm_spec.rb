@@ -1,4 +1,5 @@
 require "spec_helper"
+require "docker"
 
 describe SSHPM do
   it "has a version number" do
