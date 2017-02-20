@@ -3,9 +3,15 @@ require 'sshpm/tasks'
 class SSHPM::Manager
   attr_accessor :host, :tasks
 
-  def initialize(host='localhost')
+  def initialize(host=nil)
     @host = host
     @tasks = []
+  end
+
+  def run_tasks
+    tasks.map do |task|
+      task.run_on(@host)
+    end
   end
 
   def add_user(&block)

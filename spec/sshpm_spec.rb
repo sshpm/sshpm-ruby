@@ -49,5 +49,38 @@ describe SSHPM do
         end
       end
     end
+
+    context "Add a new user" do
+      before :all do
+        @user = user = {
+          username: Faker::Internet.user_name,
+          password: Faker::Internet.password
+        }
+
+        @hosts = @test_servers.map do |server|
+          {
+            hostname: 'localhost',
+            port: server[:port], 
+            user: 'root',
+            password: 'test_password'
+          }
+        end
+
+        SSHPM.manage(@hosts) do
+          add_user do
+            name user[:username]
+            password user[:password]
+          end
+        end
+      end
+
+      it "login successfully as the new user on all test servers" do
+        @test_servers.each do |server|
+          expect do
+            Net::SSH.start('localhost', @user[:username], password: @user[:password], port: server[:port], non_interactive: true, paranoid: false)
+          end.to_not raise_error
+        end
+      end
+    end
   end
 end

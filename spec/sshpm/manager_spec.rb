@@ -1,13 +1,12 @@
 require 'spec_helper'
-require 'faker'
 
 describe SSHPM::Manager do
   it "Newly created manager has no tasks" do
     expect(SSHPM::Manager.new.tasks).to eq([])
   end
 
-  it "If not specified, host must be equal to 'localhost'" do
-    expect(SSHPM::Manager.new.host).to eq('localhost')
+  it "If not specified, host must be nil" do
+    expect(SSHPM::Manager.new.host).to eq(nil)
   end
   
   context "add_user" do
@@ -19,8 +18,8 @@ describe SSHPM::Manager do
 
       (1..10).each do |index|
         @manager.add_user do
-          name Faker::Name.name
-          public_key Faker::Crypto.sha256
+          name Faker::Internet.user_name
+          password Faker::Internet.password
         end
 
         expect(@manager.tasks.size).to eq(index)
@@ -47,8 +46,8 @@ describe SSHPM::Manager do
 
       (1..10).each do |index|
         @manager.remove_user do
-          name Faker::Name.name
-          public_key Faker::Crypto.sha256
+          name Faker::Internet.user_name
+          password Faker::Internet.password
         end
 
         expect(@manager.tasks.size).to eq(index)
