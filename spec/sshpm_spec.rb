@@ -104,6 +104,21 @@ describe SSHPM do
             end.to_not raise_error
           end
         end
+
+        it "login fails if password is wrong" do
+          @test_servers.each do |server|
+            expect do
+              opts = {
+                password: Faker::Internet.password,
+                port: server[:port],
+                non_interactive: true,
+                paranoid: false
+              }
+              
+              Net::SSH.start('localhost', @user[:username], opts)
+            end.to raise_error(Net::SSH::AuthenticationFailed)
+          end
+        end
       end
 
       context "with only pub/private keys" do
@@ -145,6 +160,119 @@ describe SSHPM do
 
               Net::SSH.start('localhost', @user[:username], opts)
             end.to_not raise_error
+          end
+        end
+
+        it "login fails if private_key is wrong" do
+          @test_servers.each do |server|
+            expect do
+              opts = {
+                keys: [],
+                key_data: [SSHKey.generate.private_key],
+                keys_only: true,
+                port: server[:port],
+                non_interactive: true,
+                paranoid: false
+              }
+
+              Net::SSH.start('localhost', @user[:username], opts)
+            end.to raise_error(Net::SSH::AuthenticationFailed)
+          end
+        end
+      end
+
+      context "with both password and pub/private keys" do
+        before :all do
+          @rsa_key = SSHKey.generate
+          @user = user = {
+            username: Faker::Internet.user_name,
+            password: Faker::Internet.password,
+            public_key: @rsa_key.ssh_public_key
+          }
+
+          @hosts = @test_servers.map do |server|
+            {
+              hostname: 'localhost',
+              port: server[:port], 
+              user: 'root',
+              password: 'test_password'
+            }
+          end
+
+          SSHPM.manage(@hosts) do
+            add_user do
+              name user[:username]
+              password user[:password]
+              public_key user[:public_key]
+            end
+          end
+        end
+
+        context "login successfully as the new user on all test servers" do
+          it "using identity file" do
+            @test_servers.each do |server|
+              expect do
+                opts = {
+                  keys: [],
+                  key_data: [@rsa_key.private_key],
+                  keys_only: true,
+                  port: server[:port],
+                  non_interactive: true,
+                  paranoid: false
+                }
+
+                Net::SSH.start('localhost', @user[:username], opts)
+              end.to_not raise_error
+            end
+          end
+
+          it "using password" do
+            @test_servers.each do |server|
+              expect do
+                opts = {
+                  password: @user[:password],
+                  port: server[:port],
+                  non_interactive: true,
+                  paranoid: false
+                }
+
+                Net::SSH.start('localhost', @user[:username], opts)
+              end.to_not raise_error
+            end
+          end
+        end
+
+        context "login fails if password or private key is wrong" do
+          it "using identity file" do
+            @test_servers.each do |server|
+              expect do
+                opts = {
+                  keys: [],
+                  key_data: [SSHKey.generate.private_key],
+                  keys_only: true,
+                  port: server[:port],
+                  non_interactive: true,
+                  paranoid: false
+                }
+
+                Net::SSH.start('localhost', @user[:username], opts)
+              end.to raise_error(Net::SSH::AuthenticationFailed)
+            end
+          end
+
+          it "using password" do
+            @test_servers.each do |server|
+              expect do
+                opts = {
+                  password: Faker::Internet.password,
+                  port: server[:port],
+                  non_interactive: true,
+                  paranoid: false
+                }
+
+                Net::SSH.start('localhost', @user[:username], opts)
+              end.to raise_error(Net::SSH::AuthenticationFailed)
+            end
           end
         end
       end
