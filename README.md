@@ -26,7 +26,7 @@ Or install it yourself as:
 SSHPM.manage(['host1', 'host2', 'host3']) do
   add_user do
     name 'user1_name'
-    public_key 'OnotaXaeouaenthaeu'
+    password 'OnotaXaeouaenthaeu'
     sudo true
   end
 
@@ -37,7 +37,7 @@ SSHPM.manage(['host1', 'host2', 'host3']) do
   # in this case, the user is not sudo
   add_user do
     name 'user3_name'
-    public_key 'OnotaXaeouaenthaeu'
+    password 'OnotaXaeouaenthaeu'
   end
 end
 ```

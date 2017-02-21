@@ -1,18 +1,18 @@
+require "net/ssh"
 require "sshpm/version"
+require "sshpm/types"
 require "sshpm/manager"
+require "sshpm/entities"
 
 module SSHPM
   def self.manage(hosts = [], &block)
     hosts = [hosts] unless hosts.is_a? Array
+    hosts = hosts.map { |host| Host.new host }
 
-    unless hosts.all? { |host| [String, Symbol].include? host.class }
-      raise TypeError('hosts must be either String or Symbols')
-    end
-
-    hosts.map(&:to_s).uniq.map do |host|
+    hosts.map do |host|
       manager = Manager.new(host)
       manager.instance_eval(&block)
-      manager.tasks
+      manager.run_tasks
     end
   end
 end
