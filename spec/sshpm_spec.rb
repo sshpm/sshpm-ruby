@@ -13,6 +13,8 @@ describe SSHPM do
       platforms = [
         'ubuntu-1404',
         'ubuntu-1604',
+        'ubuntu-1610',
+        'ubuntu-1704',
       ]
 
       @test_servers = platforms.map do |platform|
