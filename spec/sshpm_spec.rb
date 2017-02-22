@@ -10,7 +10,10 @@ describe SSHPM do
 
   context "Docker test servers" do
     before :all do
-      platforms = ['ubuntu-1604']
+      platforms = [
+        'ubuntu-1404',
+        'ubuntu-1604',
+      ]
 
       @test_servers = platforms.map do |platform|
         container = Docker::Container.create(
@@ -99,7 +102,7 @@ describe SSHPM do
                 non_interactive: true,
                 paranoid: false
               }
-              
+
               Net::SSH.start('localhost', @user[:username], opts)
             end.to_not raise_error
           end

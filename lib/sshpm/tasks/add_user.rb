@@ -12,7 +12,12 @@ module SSHPM::Tasks
         raise TypeError("host #{host} is not a #{SSHPM::Host}")
       end
 
-      options = { password: host.password, port: host.port }
+      options = {
+        password: host.password,
+        port: host.port,
+        paranoid: false
+      }
+
       Net::SSH.start(host.hostname, host.user, options) do |ssh|
         ssh.exec! "useradd -m #{name}"
 
