@@ -17,7 +17,7 @@ module SSHPM
       ]
     end
 
-    def self.run_docker_container image
+    def self.run_docker_container(image)
       Docker::Container.create(
         'Image' => image,
         'ExposedPorts' => { '22/tcp' => {} },
@@ -25,6 +25,26 @@ module SSHPM
           'PortBindings' => { '22/tcp' => [{}] }
         }
       ).start
+    end
+
+    def self.ssh_password_options(opts={})
+      {
+        password: opts[:password] || 'test_password',
+        port: opts[:port] || '22',
+        non_interactive: opts[:non_interactive] || true,
+        paranoid: opts[:paranoid] || false
+      }
+    end
+
+    def self.ssh_identity_options(opts={})
+      {
+        keys: opts[:keys] || [],
+        key_data: opts[:key_data],
+        keys_only: opts[:keys_only] || true,
+        port: opts[:port] || @port,
+        non_interactive: opts[:non_interactive] || true,
+        paranoid: opts[:paranoid] || false
+      }
     end
   end
 end
