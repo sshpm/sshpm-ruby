@@ -172,21 +172,65 @@ describe SSHPM do
           end
 
           it "user can use sudo on all test servers" do
-              expect do
                 opts = {
                   password: @user[:password],
                   port: @port,
                   paranoid: false
                 }
-            
+                
                 Net::SSH.start('localhost', @user[:username], opts) do |ssh|
-                  ssh.exec!("bash /var/scripts/test_sudo.sh")
+
+                  output = ssh.exec!("echo #{@user[:password]} | sudo -S ls > /dev/null")
+                  expect(output).to be_empty
+
                 end
-
-              end.to eq("0")
-
-
+             
           end
+
+
+       end
+
+        context "with no sudo access defined in user definition" do
+          before :all do
+            @user = user ={
+              username: Faker::Internet.user_name,
+              password: Faker::Internet.password,
+              sudo: false
+            }
+            @host = {
+              hostname: 'localhost',
+              port: @port,
+              user: 'root',
+              password: 'test_password'
+            }
+
+            SSHPM.manage(@host) do
+              add_user do
+                name user[:username]
+                password user[:password]
+                sudo user[:sudo]
+              end
+            end
+          end
+
+          it "user cannot use sudo on all test servers" do
+                opts = {
+                  password: @user[:password],
+                  port: @port,
+                  paranoid: false
+                }
+                
+                Net::SSH.start('localhost', @user[:username], opts) do |ssh|
+                  
+                  output = ssh.exec!("echo #{@user[:password]} | sudo -S ls > /dev/null")
+                  expect(output).to_not be_empty
+
+                end
+          
+          end
+        
+
+       end
 
 
         context "with both password and pub/private keys" do
