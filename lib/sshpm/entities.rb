@@ -1,9 +1,5 @@
 require 'dry-struct'
 
-module Types
-  include Dry::Types.module
-end
-
 module SSHPM
   # Keeps data for a manageable host and perform type validations
   # on the attributes
