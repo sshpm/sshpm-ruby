@@ -35,6 +35,12 @@ module SSHPM::Tasks
           ssh.exec! "chmod 600 #{auth_keys_file}"
           ssh.exec! "chown -R #{name}:#{name} #{ssh_dir}"
         end
+
+        if sudo 
+          ssh.exec! "usermod -a -G sudo #{name}"
+        end
+
+
       end
     end
   end
