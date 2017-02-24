@@ -47,7 +47,6 @@ describe SSHPM::Manager do
       (1..10).each do |index|
         @manager.remove_user do
           name Faker::Internet.user_name
-          password Faker::Internet.password
         end
 
         expect(@manager.tasks.size).to eq(index)

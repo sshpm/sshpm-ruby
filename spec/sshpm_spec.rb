@@ -8,7 +8,7 @@ describe SSHPM do
   SSHPM::Tests::Platforms::Docker.each do |platform|
     context "Docker test on #{platform[:name]}" do
       before :all do
-        @container = SSHPM::Tests::run_docker_container platform[:image]
+        @container = SSHPM::Tests.run_docker_container platform[:image]
         @port = @container.json["NetworkSettings"]["Ports"]["22/tcp"].first["HostPort"]
       end
 
@@ -19,26 +19,14 @@ describe SSHPM do
       context "Login as root" do
         it "is successfull if password is correct" do
           expect do
-            opts = {
-              password: 'test_password',
-              port: @port,
-              non_interactive: true,
-              paranoid: false
-            }
-
+            opts = SSHPM::Tests.ssh_password_options port: @port
             Net::SSH.start('localhost', 'root', opts)
           end.to_not raise_error
         end
 
         it "is unsuccessfull if password is incorrect" do
           expect do
-            opts = {
-              password: 'test_passwrd',
-              port: @port,
-              non_interactive: true,
-              paranoid: false
-            }
-
+            opts = SSHPM::Tests.ssh_password_options port: @port, password: 'wrong_password'
             Net::SSH.start('localhost', 'root', opts)
           end.to raise_error(Net::SSH::AuthenticationFailed)
         end
@@ -69,28 +57,35 @@ describe SSHPM do
 
           it "login successfully as the new user on all test servers" do
             expect do
-              opts = {
-                password: @user[:password],
-                port: @port,
-                non_interactive: true,
-                paranoid: false
-              }
-
+              opts = SSHPM::Tests.ssh_password_options port: @port, password: @user[:password]
               Net::SSH.start('localhost', @user[:username], opts)
             end.to_not raise_error
           end
 
           it "login fails if password is wrong" do
             expect do
-              opts = {
-                password: Faker::Internet.password,
-                port: @port,
-                non_interactive: true,
-                paranoid: false
-              }
-              
+              opts = SSHPM::Tests.ssh_password_options port: @port, password: Faker::Internet.password
               Net::SSH.start('localhost', @user[:username], opts)
             end.to raise_error(Net::SSH::AuthenticationFailed)
+          end
+
+          context "Removing user" do
+            before :all do
+              user = @user
+              SSHPM.manage(@host) do
+                remove_user do
+                  name user[:username]
+                  delete_home true
+                end
+              end
+            end
+
+            it "can't login after deletion" do
+              expect do
+                opts = SSHPM::Tests.ssh_password_options port: @port, password: @user[:password]
+                Net::SSH.start('localhost', @user[:username], opts)
+              end.to raise_error(Net::SSH::AuthenticationFailed)
+            end
           end
         end
 
@@ -119,32 +114,35 @@ describe SSHPM do
 
           it "login successfully as the new user on all test servers" do
             expect do
-              opts = {
-                keys: [],
-                key_data: [@rsa_key.private_key],
-                keys_only: true,
-                port: @port,
-                non_interactive: true,
-                paranoid: false
-              }
-
+              opts = SSHPM::Tests.ssh_identity_options port: @port, key_data: [@rsa_key.private_key]
               Net::SSH.start('localhost', @user[:username], opts)
             end.to_not raise_error
           end
 
           it "login fails if private_key is wrong" do
             expect do
-              opts = {
-                keys: [],
-                key_data: [SSHKey.generate.private_key],
-                keys_only: true,
-                port: @port,
-                non_interactive: true,
-                paranoid: false
-              }
-
+              opts = SSHPM::Tests.ssh_identity_options port: @port, key_data: [SSHKey.generate.private_key]
               Net::SSH.start('localhost', @user[:username], opts)
             end.to raise_error(Net::SSH::AuthenticationFailed)
+          end
+
+          context "Removing user" do
+            before :all do
+              user = @user
+              SSHPM.manage(@host) do
+                remove_user do
+                  name user[:username]
+                  delete_home true
+                end
+              end
+            end
+
+            it "can't login after deletion" do
+              expect do
+                opts = SSHPM::Tests.ssh_identity_options port: @port, key_data: [@rsa_key.private_key]
+                Net::SSH.start('localhost', @user[:username], opts)
+              end.to raise_error(Net::SSH::AuthenticationFailed)
+            end
           end
         end
 
@@ -345,28 +343,14 @@ describe SSHPM do
           context "login successfully as the new user on all test servers" do
             it "using identity file" do
               expect do
-                opts = {
-                  keys: [],
-                  key_data: [@rsa_key.private_key],
-                  keys_only: true,
-                  port: @port,
-                  non_interactive: true,
-                  paranoid: false
-                }
-
+                opts = SSHPM::Tests.ssh_identity_options port: @port, key_data: [@rsa_key.private_key]
                 Net::SSH.start('localhost', @user[:username], opts)
               end.to_not raise_error
             end
 
             it "using password" do
               expect do
-                opts = {
-                  password: @user[:password],
-                  port: @port,
-                  non_interactive: true,
-                  paranoid: false
-                }
-
+                opts = SSHPM::Tests.ssh_password_options port: @port, password: @user[:password]
                 Net::SSH.start('localhost', @user[:username], opts)
               end.to_not raise_error
             end
@@ -375,28 +359,33 @@ describe SSHPM do
           context "login fails if password or private key is wrong" do
             it "using identity file" do
               expect do
-                opts = {
-                  keys: [],
-                  key_data: [SSHKey.generate.private_key],
-                  keys_only: true,
-                  port: @port,
-                  non_interactive: true,
-                  paranoid: false
-                }
-
+                opts = SSHPM::Tests.ssh_identity_options port: @port, key_data: [SSHKey.generate.private_key]
                 Net::SSH.start('localhost', @user[:username], opts)
               end.to raise_error(Net::SSH::AuthenticationFailed)
             end
 
             it "using password" do
               expect do
-                opts = {
-                  password: Faker::Internet.password,
-                  port: @port,
-                  non_interactive: true,
-                  paranoid: false
-                }
+                opts = SSHPM::Tests.ssh_password_options port: @port, password: Faker::Internet.password
+                Net::SSH.start('localhost', @user[:username], opts)
+              end.to raise_error(Net::SSH::AuthenticationFailed)
+            end
+          end
 
+          context "Removing user" do
+            before :all do
+              user = @user
+              SSHPM.manage(@host) do
+                remove_user do
+                  name user[:username]
+                  delete_home true
+                end
+              end
+            end
+
+            it "can't login after deletion" do
+              expect do
+                opts = SSHPM::Tests.ssh_identity_options port: @port, key_data: [@rsa_key.private_key]
                 Net::SSH.start('localhost', @user[:username], opts)
               end.to raise_error(Net::SSH::AuthenticationFailed)
             end
