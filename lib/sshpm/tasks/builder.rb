@@ -1,5 +1,7 @@
 module SSHPM::Tasks
-  class SSHPM::Tasks::Builder
+  # A helper entity whose intent is to provide and idiom to task
+  # creation DSL
+  class Builder
     def initialize
       @attributes = {}
     end
