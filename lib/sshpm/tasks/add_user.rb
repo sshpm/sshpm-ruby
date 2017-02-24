@@ -32,13 +32,7 @@ module SSHPM::Tasks
     def run_on(host)
       super
 
-      options = {
-        password: host.password,
-        port: host.port,
-        paranoid: false
-      }
-
-      Net::SSH.start(host.hostname, host.user, options) do |ssh|
+      Net::SSH.start(host.hostname, host.user, ssh_options(host)) do |ssh|
         ssh.exec! "useradd -m #{name}"
 
         password.bind do |password|

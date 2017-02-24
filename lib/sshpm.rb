@@ -3,7 +3,7 @@ require "sshpm/version"
 require "sshpm/exceptions"
 require "sshpm/types"
 require "sshpm/manager"
-require "sshpm/entities"
+require "sshpm/host"
 
 module SSHPM
 
