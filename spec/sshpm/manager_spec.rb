@@ -35,6 +35,14 @@ describe SSHPM::Manager do
         expect(task).to be_a(SSHPM::Tasks::AddUser)
       end
     end
+
+    it "Should not create an AddUser task without password or public_key" do
+      expect do
+        @manager.add_user do
+          name Faker::Internet.user_name
+        end
+      end.to raise_error(SSHPM::NoAuthenticationMethodDefined)
+    end
   end
 
   context "remove_user" do
