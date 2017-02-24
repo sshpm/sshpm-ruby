@@ -7,11 +7,15 @@ module SSHPM::Tasks
     attribute :public_key, Types::Maybe::Strict::String
     attribute :sudo, Types::Strict::Bool.default(false)
 
-    def run_on(host)
+    def initialize(h)
       super
       if password.none? and public_key.none?
         raise SSHPM::NoAuthenticationMethodDefined
       end
+    end
+
+    def run_on(host)
+      super
 
       options = {
         password: host.password,
