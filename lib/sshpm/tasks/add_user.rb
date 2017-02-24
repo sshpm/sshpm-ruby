@@ -3,13 +3,13 @@ module SSHPM::Tasks
     constructor_type :strict_with_defaults
 
     attribute :name, Types::Strict::String
-    attribute :password, Types::Strict::String.default("")
-    attribute :public_key, Types::Strict::String.default("")
+    attribute :password, Types::Maybe::Strict::String
+    attribute :public_key, Types::Maybe::Strict::String
     attribute :sudo, Types::Strict::Bool.default(false)
 
     def run_on(host)
       super
-      if password == "" and public_key == ""
+      if password.none? and public_key.none?
         raise SSHPM::NoAuthenticationMethodDefined
       end
 
@@ -22,11 +22,11 @@ module SSHPM::Tasks
       Net::SSH.start(host.hostname, host.user, options) do |ssh|
         ssh.exec! "useradd -m #{name}"
 
-        if password != ""
+        password.bind do |password|
           ssh.exec! "echo \"#{name}:#{password}\" | chpasswd"
         end
 
-        if public_key != ""
+        public_key.bind do |public_key|
           ssh_dir = "/home/#{name}/.ssh"
           auth_keys_file = "#{ssh_dir}/authorized_keys"
 
