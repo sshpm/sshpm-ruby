@@ -15,6 +15,33 @@ module SSHPM
           raise TypeError("host #{host} is not a #{SSHPM::Host}")
         end
       end
+
+      # Creates ssh options to be used in Net::SSH#start according
+      # to the given host attributes
+      #
+      # @param host [SSHPM::Hots]
+      # @return [Hash] options attribute
+      def ssh_options(host)
+        if not host.is_a? SSHPM::Host
+          raise TypeError("host #{host} is not a #{SSHPM::Host}")
+        end
+
+        options = host.password.fmap do |password|
+          { password: password, port: host.port, paranoid: false }
+        end
+
+        options = options || host.identity.fmap do |identity|
+          {
+            keys: [],
+            key_data: [identity],
+            keys_only: true,
+            non_interactive: true,
+            paranoid: false
+          }
+        end
+
+        options.value
+      end
     end
   end
 end
