@@ -148,7 +148,7 @@ describe SSHPM do
           end
         end
 
-        context "with sudo access" do
+        context "with sudo access and password only" do
           before :all do
             @user = user ={
               username: Faker::Internet.user_name,
@@ -190,7 +190,7 @@ describe SSHPM do
 
        end
 
-        context "with no sudo access defined in user definition" do
+        context "with no sudo access and password only" do
           before :all do
             @user = user ={
               username: Faker::Internet.user_name,
@@ -231,6 +231,90 @@ describe SSHPM do
         
 
        end
+
+       context "with sudo access and only pub/private keys" do
+          before :all do
+            @rsa_key = SSHKey.generate
+            @user = user = {
+              username: Faker::Internet.user_name,
+              public_key: @rsa_key.ssh_public_key,
+              sudo: true
+            }
+
+            @host = {
+              hostname: 'localhost',
+              port: @port, 
+              user: 'root',
+              password: 'test_password'
+            }
+
+            SSHPM.manage(@host) do
+              add_user do
+                name user[:username]
+                public_key user[:public_key]
+              end
+            end
+          end
+
+          it "user can use sudo on all test servers" do
+                opts = {
+                  password: @user[:password],
+                  port: @port,
+                  paranoid: false
+                }
+                
+                Net::SSH.start('localhost', @user[:username], opts) do |ssh|
+
+                  output = ssh.exec!("echo #{@user[:password]} | sudo -kS --prompt=\"\" ls > /dev/null")
+                  expect(output).to be_empty
+
+                end
+             
+          end
+
+        end
+
+        context "with no sudo access and only pub/private keys" do
+          before :all do
+            @rsa_key = SSHKey.generate
+            @user = user = {
+              username: Faker::Internet.user_name,
+              public_key: @rsa_key.ssh_public_key,
+              sudo: false
+            }
+
+            @host = {
+              hostname: 'localhost',
+              port: @port, 
+              user: 'root',
+              password: 'test_password'
+            }
+
+            SSHPM.manage(@host) do
+              add_user do
+                name user[:username]
+                public_key user[:public_key]
+              end
+            end
+          end
+
+          it "user cannot use sudo on all test servers" do
+                opts = {
+                  password: @user[:password],
+                  port: @port,
+                  paranoid: false
+                }
+                
+                Net::SSH.start('localhost', @user[:username], opts) do |ssh|
+                  
+                  output = ssh.exec!("echo #{@user[:password]} | sudo -kS --prompt=\"\" ls > /dev/null")
+                  expect(output).to_not be_empty
+
+                end
+          
+          end
+
+        end
 
 
         context "with both password and pub/private keys" do
