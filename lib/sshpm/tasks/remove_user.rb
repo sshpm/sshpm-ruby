@@ -1,14 +1,12 @@
 module SSHPM::Tasks
-  class RemoveUser < Dry::Struct
+  class RemoveUser < BaseTask
     constructor_type :strict_with_defaults
 
     attribute :name, Types::Strict::String
     attribute :delete_home, Types::Strict::Bool.default(false)
 
     def run_on(host)
-      unless host.is_a? SSHPM::Host
-        raise TypeError("host #{host} is not a #{SSHPM::Host}")
-      end
+      super
 
       options = {
         password: host.password,

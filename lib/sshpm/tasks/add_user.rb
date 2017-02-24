@@ -1,5 +1,5 @@
 module SSHPM::Tasks
-  class AddUser < Dry::Struct
+  class AddUser < BaseTask
     constructor_type :strict_with_defaults
 
     attribute :name, Types::Strict::String
@@ -8,8 +8,9 @@ module SSHPM::Tasks
     attribute :sudo, Types::Strict::Bool.default(false)
 
     def run_on(host)
-      unless host.is_a? SSHPM::Host
-        raise TypeError("host #{host} is not a #{SSHPM::Host}")
+      super
+      if password == "" and public_key == ""
+        raise SSHPM::NoAuthenticationMethodDefined
       end
 
       options = {
