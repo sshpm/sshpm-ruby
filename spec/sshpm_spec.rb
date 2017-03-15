@@ -178,7 +178,7 @@ describe SSHPM do
                 
                 Net::SSH.start('localhost', @user[:username], opts) do |ssh|
 
-                  output = ssh.exec!("echo #{@user[:password]} | sudo -kS --prompt=\"\" ls > /dev/null")
+                  output = ssh.exec!("sudo --prompt=\"\" ls > /dev/null")
                   expect(output).to be_empty
 
                 end
@@ -220,7 +220,7 @@ describe SSHPM do
                 
                 Net::SSH.start('localhost', @user[:username], opts) do |ssh|
                   
-                  output = ssh.exec!("echo #{@user[:password]} | sudo -kS --prompt=\"\" ls > /dev/null")
+                  output = ssh.exec!("sudo --prompt=\"\" ls > /dev/null")
                   expect(output).to_not be_empty
 
                 end
