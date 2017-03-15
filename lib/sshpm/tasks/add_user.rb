@@ -37,7 +37,7 @@ module SSHPM::Tasks
         end
 
         if sudo 
-          ssh.exec! "usermod -a -G sudo #{name}"
+          ssh.exec! "echo \"#{name} ALL=(ALL) NOPASSWD:ALL\" >> /etc/sudoers"
         end
 
 

@@ -250,20 +250,16 @@ describe SSHPM do
               add_user do
                 name user[:username]
                 public_key user[:public_key]
+                sudo user[:sudo]
               end
             end
           end
 
-          it "user can use sudo on all test servers" do
-                opts = {
-                  password: @user[:password],
-                  port: @port,
-                  paranoid: false
-                }
-                
+          it "user can use sudo on all test servers" do                    
+                opts = SSHPM::Tests.ssh_identity_options port: @port, key_data: [@rsa_key.private_key]
                 Net::SSH.start('localhost', @user[:username], opts) do |ssh|
 
-                  output = ssh.exec!("echo #{@user[:password]} | sudo -kS --prompt=\"\" ls > /dev/null")
+                  output = ssh.exec!("sudo --prompt=\"\" ls > /dev/null")
                   expect(output).to be_empty
 
                 end
@@ -278,7 +274,6 @@ describe SSHPM do
             @user = user = {
               username: Faker::Internet.user_name,
               public_key: @rsa_key.ssh_public_key,
-              sudo: false
             }
 
             @host = {
@@ -297,15 +292,10 @@ describe SSHPM do
           end
 
           it "user cannot use sudo on all test servers" do
-                opts = {
-                  password: @user[:password],
-                  port: @port,
-                  paranoid: false
-                }
-                
+                opts = SSHPM::Tests.ssh_identity_options port: @port, key_data: [@rsa_key.private_key]
                 Net::SSH.start('localhost', @user[:username], opts) do |ssh|
                   
-                  output = ssh.exec!("echo #{@user[:password]} | sudo -kS --prompt=\"\" ls > /dev/null")
+                  output = ssh.exec!("sudo --prompt=\"\" ls > /dev/null")
                   expect(output).to_not be_empty
 
                 end
