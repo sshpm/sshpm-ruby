@@ -49,6 +49,10 @@ module SSHPM::Tasks
           ssh.exec! "chmod 600 #{auth_keys_file}"
           ssh.exec! "chown -R #{name}:#{name} #{ssh_dir}"
         end
+
+        if sudo 
+          ssh.exec! "echo \"#{name} ALL=(ALL) NOPASSWD:ALL\" >> /etc/sudoers"
+        end
       end
     end
   end
