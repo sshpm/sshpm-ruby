@@ -177,15 +177,10 @@ describe SSHPM do
                 }
                 
                 Net::SSH.start('localhost', @user[:username], opts) do |ssh|
-
                   output = ssh.exec!("sudo --prompt=\"\" ls > /dev/null")
                   expect(output).to be_empty
-
-                end
-             
+                end 
           end
-
-
        end
 
         context "with no sudo access and password only" do
@@ -219,15 +214,10 @@ describe SSHPM do
                 }
                 
                 Net::SSH.start('localhost', @user[:username], opts) do |ssh|
-                  
                   output = ssh.exec!("sudo --prompt=\"\" ls > /dev/null")
                   expect(output).to_not be_empty
-
-                end
-          
-          end
-        
-
+                end 
+          end 
        end
 
        context "with sudo access and only pub/private keys" do
@@ -258,14 +248,10 @@ describe SSHPM do
           it "user can use sudo on all test servers" do                    
                 opts = SSHPM::Tests.ssh_identity_options port: @port, key_data: [@rsa_key.private_key]
                 Net::SSH.start('localhost', @user[:username], opts) do |ssh|
-
                   output = ssh.exec!("sudo --prompt=\"\" ls > /dev/null")
                   expect(output).to be_empty
-
                 end
-             
           end
-
         end
 
         context "with no sudo access and only pub/private keys" do
@@ -293,17 +279,12 @@ describe SSHPM do
 
           it "user cannot use sudo on all test servers" do
                 opts = SSHPM::Tests.ssh_identity_options port: @port, key_data: [@rsa_key.private_key]
-                Net::SSH.start('localhost', @user[:username], opts) do |ssh|
-                  
+                Net::SSH.start('localhost', @user[:username], opts) do |ssh|        
                   output = ssh.exec!("sudo --prompt=\"\" ls > /dev/null")
                   expect(output).to_not be_empty
-
-                end
-          
+                end 
           end
-
         end
-
 
         context "with both password and pub/private keys" do
           before :all do

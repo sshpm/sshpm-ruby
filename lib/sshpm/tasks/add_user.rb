@@ -53,8 +53,6 @@ module SSHPM::Tasks
         if sudo 
           ssh.exec! "echo \"#{name} ALL=(ALL) NOPASSWD:ALL\" >> /etc/sudoers"
         end
-
-
       end
     end
   end
